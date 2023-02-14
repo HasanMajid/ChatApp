@@ -4,7 +4,7 @@ import "./App.css";
 import Chat from "./Chat";
 
 // const socket = io.connect("http://localhost:3000");
-const socket = io.connect("https://chat-app-server-fawn.vercel.app");
+const socket = io.connect("https://chat-app-server-51mx.onrender.com/");
 
 function App() {
   const [username, setUsername] = useState(0);
