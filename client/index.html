@@ -1,13 +1,104 @@
+<!-- File path: index.html (project root folder) -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <title>WebSocket Client</title>
+    <style>
+        h1 {
+            color: green;
+        }
+
+        .container {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>WebSocket Example</h1>
+    <div id="join_room_input" class="container">
+        <label>Send Message to Server:</label> <br><br>
+        <input type="text" id="room_id" placeholder="Enter Room ID">
+        <button onclick="joinRoom()">Join Room</button>
+        <div id="output"></div>
+    </div>
+
+    <div class="container" id="room" style="display: none;">
+        <label>Room:</label> <br><br>
+        <div id="room_id"></div>
+        <div id="room_messages"></div>
+        <input type="text" id="message" placeholder="Enter Message">
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+
+    <script>
+        // Create a WebSocket instance
+        // and connect to the server
+        const socket = new WebSocket('ws://localhost:8080');
+
+        // Event listener for when 
+        //the WebSocket connection is opened
+        socket.onopen = function (event) {
+            // Alert the user that they are 
+            // connected to the WebSocket server
+            alert('You are Connected to WebSocket Server');
+        };
+
+        // Event listener for when a message
+        //  is received from the server
+        socket.onmessage = function (event) {
+            const { meta, room, message } = JSON.parse(event.data);
+            
+            if (meta === "joined_room") {
+                $("#join_room_input").hide();
+                $("#room").show();
+                $("#room_id").text(room);
+            } else if (meta == "room_message") {
+                $("#room_messages").append(`<p>${message}</p>`);
+            }
+        };
+
+        addEventListener("beforeunload", (event) => {
+            const room = $("#room_id").text();
+
+            socket.send(JSON.stringify({
+                meta: 'leave_room',
+                room: room
+            }));
+        });
+
+        // Event listener for when the 
+        // WebSocket connection is closed
+        socket.onclose = function (event) {
+            console.log('Disconnected from WebSocket server');
+        };
+
+        // Function to send a message
+        //  to the WebSocket server
+        function joinRoom() {
+            // Get the room id
+            const room = $("#room_id").val();
+            console.log(room);
+            socket.send(JSON.stringify({
+                meta: 'join_room',
+                room: room
+            }));
+        }
+
+        function sendMessage() {
+            const message = $("#message").val();
+            const room = $("#room_id").text();
+            socket.send(JSON.stringify({
+                meta: 'send_message',
+                room: room,
+                message: message
+            }));
+        }
+    </script>
+</body>
+
 </html>
