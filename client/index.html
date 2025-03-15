@@ -22,15 +22,15 @@
 <body>
     <h1 style="width: fit-content; margin: auto;">WebSocket Example</h1>
     <div id="join_room_input" class="container">
-        <label>Send Message to Server:</label> <br><br>
-        <input type="text" id="room_id" placeholder="Enter Room ID">
+        <div id="state"></div>
+        <input type="text" id="room_id_input" placeholder="Enter Room ID">
         <button onclick="joinRoom()">Join Room</button>
         <div id="output"></div>
     </div>
 
     <div class="container" id="room" style="display: none;">
-        <label>Room:</label> <br><br>
-        <div id="room_id"></div>
+        <label>Room:</label>
+        <span id="room_id"></span>
         <div id="room_messages"></div>
         <input type="text" id="message" placeholder="Enter Message">
         <button onclick="sendMessage()">Send Message</button>
@@ -39,14 +39,22 @@
     <script>
         // Create a WebSocket instance
         // and connect to the server
-        const socket = new WebSocket('ws://localhost:8080');
+        const socket = new WebSocket('https://websocket-chatapp-rpql.onrender.com');
+
+        if (socket.readyState === WebSocket.CONNECTING){
+            $("#state").text("Connecting...");
+        } else if (socket.readyState === WebSocket.CLOSING){
+            $("#state").text("Closing...");
+        } else if (socket.readyState === WebSocket.CLOSED){
+            $("#state").text("Closed");
+        }
 
         // Event listener for when 
         //the WebSocket connection is opened
         socket.onopen = function (event) {
             // Alert the user that they are 
             // connected to the WebSocket server
-            alert('You are Connected to WebSocket Server');
+            $("#state").text("Connected");
         };
 
         // Event listener for when a message
@@ -64,7 +72,7 @@
         };
 
         addEventListener("beforeunload", (event) => {
-            const room = $("#room_id").text();
+            const room = $("#room_id_input").text();
 
             socket.send(JSON.stringify({
                 meta: 'leave_room',
@@ -82,7 +90,8 @@
         //  to the WebSocket server
         function joinRoom() {
             // Get the room id
-            const room = $("#room_id").val();
+            const room = $("#room_id_input").val();
+            $("#room_id").text(room);
             console.log(room);
             socket.send(JSON.stringify({
                 meta: 'join_room',
