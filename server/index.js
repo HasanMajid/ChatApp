@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { randomUUID } = require('crypto');
+const { randomUUID } = require("crypto");
 const cors = require("cors");
 const WebSocket = require("ws");
 app.use(cors());
@@ -36,23 +36,23 @@ wss.on("connection", (ws) => {
     const { message, meta, room } = data;
     console.log(data);
 
-    if (meta == "join_room"){
+    if (meta == "join_room") {
       rooms[room] = rooms[room] ? [...rooms[room], ws] : [ws];
       console.log(`User with ID: ${ws} joined room: ${room}`);
-      ws.send(JSON.stringify({meta: 'joined_room', room}));
-    }
-  
-    if (meta == "send_message" && message){
-      Object.entries(rooms[room]).forEach(([, sock]) => sock.send(JSON.stringify({ message , meta: 'room_message', room })));
+      ws.send(JSON.stringify({ meta: "joined_room", room }));
     }
 
-    if (meta == "leave_room"){
+    if (meta == "send_message" && message) {
+      Object.entries(rooms[room]).forEach(([, sock]) =>
+        sock.send(JSON.stringify({ message, meta: "room_message", room }))
+      );
+    }
+
+    if (meta == "leave_room") {
       console.log(`User with ID: ${ID} left room: ${room}`);
-      Object.keys(rooms).forEach(room => leave(room, ws.ID));
+      Object.keys(rooms).forEach((room) => leave(room, ws.ID));
     }
   });
-
-
 
   ws.on("close", () => {
     console.log("Client disconnected", rooms);
