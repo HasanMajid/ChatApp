@@ -47,14 +47,10 @@ wss.on("connection", (ws) => {
         sock.send(JSON.stringify({ message, meta: "room_message", room }))
       );
     }
-
-    if (meta == "leave_room") {
-      console.log(`User with ID: ${ID} left room: ${room}`);
-      Object.keys(rooms).forEach((room) => leave(room, ws.ID));
-    }
   });
 
-  ws.on("close", () => {
+  ws.on("close", (ws) => {
+    Object.keys(rooms).forEach((room) => leave(room, ID));
     console.log("Client disconnected", rooms);
   });
 });

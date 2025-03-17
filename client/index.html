@@ -71,15 +71,6 @@
             }
         };
 
-        addEventListener("beforeunload", (event) => {
-            const room = $("#room_id_input").text();
-
-            socket.send(JSON.stringify({
-                meta: 'leave_room',
-                room: room
-            }));
-        });
-
         // Event listener for when the 
         // WebSocket connection is closed
         socket.onclose = function (event) {
